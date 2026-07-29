@@ -2,9 +2,46 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" href="/og.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>autobizmate</title>
+    <meta
+      name="description"
+      content="AutoBizMate gives walk-in service businesses a Messenger-connected queue, arrival check-in, future scheduling, and a live staff dashboard."
+    />
+    <meta name="theme-color" content="#eee6da" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="AutoBizMate" />
+    <meta property="og:title" content="A Smarter Queue for Walk-In Businesses" />
+    <meta
+      property="og:description"
+      content="Let customers check demand, plan a visit, and enter the real queue only after they arrive."
+    />
+    <meta property="og:image" content="/og.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="A Smarter Queue for Walk-In Businesses" />
+    <meta
+      name="twitter:description"
+      content="Queue clarity and walk-in flexibility for service businesses."
+    />
+    <meta name="twitter:image" content="/og.png" />
+    <script>
+      ;(() => {
+        try {
+          const saved = localStorage.getItem('autobizmate-theme')
+          const theme =
+            saved === 'light' || saved === 'dark'
+              ? saved
+              : matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'dark'
+                : 'light'
+          document.documentElement.dataset.theme = theme
+          document.documentElement.style.colorScheme = theme
+        } catch {
+          document.documentElement.dataset.theme = 'light'
+        }
+      })()
+    </script>
+    <title>AutoBizMate — A Smarter Queue for Walk-In Businesses</title>
   </head>
   <body>
     <div id="root"></div>

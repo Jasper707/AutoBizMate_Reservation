@@ -1,21 +1,18 @@
-import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
-import { HomePage } from "./pages/HomePage";
-import { ServicesPage } from "./pages/ServicesPage";
+import { AppRouter } from './app/AppRouter'
+import { AuthProvider } from './app/providers/AuthProvider'
+import { ThemeProvider } from './app/providers/ThemeProvider'
+import { ToastProvider } from './app/providers/ToastProvider'
 
 function App() {
   return (
-    <BrowserRouter>
-      <nav>
-        <Link to="/">Home</Link>{" "}
-        <Link to="/services">Services</Link>
-      </nav>
-
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/services" element={<ServicesPage />} />
-      </Routes>
-    </BrowserRouter>
-  );
+    <ThemeProvider>
+      <ToastProvider>
+        <AuthProvider>
+          <AppRouter />
+        </AuthProvider>
+      </ToastProvider>
+    </ThemeProvider>
+  )
 }
 
-export default App;
+export default App
