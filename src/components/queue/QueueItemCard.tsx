@@ -39,6 +39,7 @@ export function QueueItemCard({
       ? formatTime(item.scheduled_start_time)
       : formatTime(item.arrived_at ?? item.joined_at)
   const itemPending = pendingKey.endsWith(`${item.source_type}:${item.source_id}`)
+  const customerNote = item.notes?.trim()
 
   return (
     <article className={`queue-card${inService ? ' queue-card--active' : ''}`}>
@@ -55,6 +56,12 @@ export function QueueItemCard({
         </div>
         <h3>{item.customer_name}</h3>
         <p>{item.service_name ?? 'Service details not specified'}</p>
+        {customerNote ? (
+          <section className="queue-card__note" aria-label="Customer note">
+            <small>Customer note</small>
+            <p>{customerNote}</p>
+          </section>
+        ) : null}
       </div>
       <div className="queue-card__details">
         {item.source_type === 'booking' ? (

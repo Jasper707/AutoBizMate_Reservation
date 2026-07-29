@@ -21,8 +21,46 @@ function withSecurityHeaders(response) {
   })
 }
 
+function runtimeConfiguration(env) {
+  return {
+    supabaseUrl: String(env.SUPABASE_URL ?? '').trim(),
+    supabasePublishableKey: String(
+      env.SUPABASE_PUBLISHABLE_KEY ?? '',
+    ).trim(),
+  }
+}
+
+function runtimeConfigResponse(request, env) {
+  const config = runtimeConfiguration(env)
+  const url = new URL(request.url)
+  const javascript = url.pathname.endsWith('.js')
+  const body = javascript
+    ? `globalThis.__AUTOBIZMATE_CONFIG__=${JSON.stringify(config)};`
+    : JSON.stringify(config)
+
+  return new Response(body, {
+    headers: {
+      'Cache-Control': 'no-store, max-age=0',
+      'Content-Type': javascript
+        ? 'application/javascript; charset=utf-8'
+        : 'application/json; charset=utf-8',
+    },
+  })
+}
+
 export default {
   async fetch(request, env) {
+    const url = new URL(request.url)
+    if (
+      request.method === 'GET'
+      && (
+        url.pathname === '/api/runtime-config'
+        || url.pathname === '/api/runtime-config.js'
+      )
+    ) {
+      return withSecurityHeaders(runtimeConfigResponse(request, env))
+    }
+
     let response = await env.ASSETS.fetch(request)
     const acceptsHtml = request.headers.get('accept')?.includes('text/html')
     const canUseAppShell = request.method === 'GET' || request.method === 'HEAD'

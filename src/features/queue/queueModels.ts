@@ -17,6 +17,8 @@ export type QueueItem = {
   arrived_at: string | null
   service_started_at: string | null
   status: QueueStatus
+  notes: string | null
+  arrival_verification_source: string | null
   queue_position: number | null
   priority_group: number
   priority_time: string | null

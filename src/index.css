@@ -1872,6 +1872,34 @@ h3 {
   font-size: 0.86rem;
 }
 
+.queue-card__note {
+  max-width: 60ch;
+  margin-top: 10px;
+  padding: 9px 11px;
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: var(--surface-inset);
+}
+
+.queue-card__note small {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--text-soft);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.queue-card__note p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
 .queue-card__details {
   display: flex;
   align-items: center;

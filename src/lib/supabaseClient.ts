@@ -1,8 +1,24 @@
 import { createClient } from '@supabase/supabase-js'
 import { authStorage } from '../features/auth/sessionStorage'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL?.trim()
-const supabasePublishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY?.trim()
+type RuntimeConfig = {
+  supabaseUrl?: string
+  supabasePublishableKey?: string
+}
+
+const runtimeConfig = (
+  globalThis as typeof globalThis & {
+    __AUTOBIZMATE_CONFIG__?: RuntimeConfig
+  }
+).__AUTOBIZMATE_CONFIG__
+
+const supabaseUrl = (
+  runtimeConfig?.supabaseUrl ?? import.meta.env.VITE_SUPABASE_URL
+)?.trim()
+const supabasePublishableKey = (
+  runtimeConfig?.supabasePublishableKey
+  ?? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
+)?.trim()
 
 export const isSupabaseConfigured = Boolean(supabaseUrl && supabasePublishableKey)
 
