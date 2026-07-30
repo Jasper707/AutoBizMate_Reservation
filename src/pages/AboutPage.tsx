@@ -113,10 +113,6 @@ export function AboutPage() {
               <li key={area}>{area}</li>
             ))}
           </ul>
-          <p className="content-note">
-            Profile details are intentionally left editable so no biography or
-            credentials are invented.
-          </p>
         </div>
       </section>
 
