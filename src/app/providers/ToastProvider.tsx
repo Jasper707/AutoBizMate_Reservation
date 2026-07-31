@@ -16,6 +16,8 @@ type ToastMessage = {
   tone: ToastTone
 }
 
+let nextToastId = 0
+
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastMessage[]>([])
 
@@ -25,7 +27,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
   const showToast = useCallback(
     (message: string, tone: ToastTone = 'success') => {
-      const id = Date.now()
+      const id = ++nextToastId
       setToasts((items) => [...items, { id, message, tone }])
       window.setTimeout(() => dismiss(id), 4200)
     },

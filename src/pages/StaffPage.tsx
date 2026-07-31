@@ -75,13 +75,20 @@ export function StaffPage() {
   const handleConfirm = async () => {
     if (!dialog) return
     try {
-      await mutate(dialog.mutation, dialog.item.source_type, dialog.item.source_id)
+      const result = await mutate(dialog.mutation, dialog.item.queue_entry_id)
       const message = {
         start: `Service started for ${dialog.item.customer_name}.`,
         complete: `Service completed for ${dialog.item.customer_name}.`,
+        requeue: `${dialog.item.customer_name} was returned to the end of the queue.`,
         cancel: `${dialog.item.customer_name} was removed from the active queue.`,
       }[dialog.mutation]
       showToast(message)
+      if (
+        result?.serviceNotificationStatus === 'not_available' ||
+        result?.nextNotification?.notificationStatus === 'not_available'
+      ) {
+        showToast('Queue updated. A Telegram notice was unavailable for one customer.')
+      }
       setDialog(null)
     } catch (mutationError) {
       showToast(
@@ -94,7 +101,7 @@ export function StaffPage() {
   }
 
   const dialogPending = Boolean(
-    dialog && pendingKey === `${dialog.mutation}:${dialog.item.source_type}:${dialog.item.source_id}`,
+    dialog && pendingKey === `${dialog.mutation}:${dialog.item.queue_entry_id}`,
   )
 
   const dialogCopy = (() => {
@@ -112,6 +119,23 @@ export function StaffPage() {
         confirm: 'Complete Service',
         cancel: 'Keep Open',
         tone: 'primary' as const,
+      }
+    }
+    if (dialog.mutation === 'requeue') {
+      return {
+        title: 'Return this customer to the queue?',
+        body: (
+          <p>
+            Stop servicing <strong>{dialog.item.customer_name}</strong> and return them
+            to the end of the queue?
+            <br /><br />
+            Their original queue number will remain the same, but their live position
+            will move to the end.
+          </p>
+        ),
+        confirm: 'Return to Queue',
+        cancel: 'Keep Servicing',
+        tone: 'danger' as const,
       }
     }
     if (dialog.mutation === 'cancel') {
@@ -145,7 +169,7 @@ export function StaffPage() {
               <strong>Currently servicing:</strong>
               <ul>
                 {inService.map((item) => (
-                  <li key={`${item.source_type}-${item.source_id}`}>
+                  <li key={item.queue_entry_id}>
                     {item.customer_name} — {item.service_name ?? 'Service'}
                   </li>
                 ))}
@@ -242,7 +266,7 @@ export function StaffPage() {
               <div className="queue-stack">
                 {inService.map((item, index) => (
                   <QueueItemCard
-                    key={`${item.source_type}-${item.source_id}`}
+                    key={item.queue_entry_id}
                     item={item}
                     visualPosition={index + 1}
                     pendingKey={pendingKey}
@@ -267,10 +291,12 @@ export function StaffPage() {
               <div className="queue-stack">
                 {waiting.map((item, index) => (
                   <QueueItemCard
-                    key={`${item.source_type}-${item.source_id}`}
+                    key={item.queue_entry_id}
                     item={item}
                     visualPosition={index + 1}
                     pendingKey={pendingKey}
+                    canStart={index === 0}
+                    startDisabledReason={index === 0 ? undefined : 'Another customer is currently locked or ordered ahead.'}
                     onAction={(mutation, selectedItem) =>
                       setDialog({ mutation, item: selectedItem })
                     }

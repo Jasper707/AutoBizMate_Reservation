@@ -620,6 +620,12 @@ h3 {
   border-color: transparent;
 }
 
+.badge--next {
+  color: var(--success);
+  background: var(--success-bg);
+  border-color: transparent;
+}
+
 .badge--neutral {
   background: var(--surface-inset);
 }
@@ -1829,6 +1835,15 @@ h3 {
   box-shadow: var(--shadow-mid);
 }
 
+.queue-card--next {
+  border-left: 5px solid var(--success);
+  background: color-mix(in srgb, var(--success-bg) 42%, var(--surface-base));
+}
+
+.queue-card--scheduled {
+  border-left: 5px solid var(--info);
+}
+
 .queue-card__position {
   width: 62px;
   height: 68px;
@@ -1870,6 +1885,13 @@ h3 {
   margin-bottom: 0;
   color: var(--text-secondary);
   font-size: 0.86rem;
+}
+
+.queue-card__identity .queue-card__notice {
+  margin-top: 7px;
+  color: var(--success);
+  font-size: 0.75rem;
+  font-weight: 750;
 }
 
 .queue-card__note {
@@ -1977,6 +1999,170 @@ h3 {
 .queue-error > svg {
   margin-bottom: 20px;
   color: var(--danger);
+}
+
+/* Public queue playground */
+.playground-page {
+  width: min(calc(100% - 40px), var(--content-wide));
+  margin-inline: auto;
+  padding-block: 70px 110px;
+}
+
+.playground-hero {
+  margin-bottom: 26px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 34px;
+}
+
+.playground-hero h1 {
+  margin: 10px 0 12px;
+  font-size: clamp(2.6rem, 6vw, 5.2rem);
+}
+
+.playground-hero p {
+  max-width: 760px;
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 1.02rem;
+}
+
+.playground-hero .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.playground-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.playground-safety {
+  margin-bottom: 28px;
+  padding: 15px 18px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  color: var(--text-secondary);
+  background: var(--accent-faint);
+  font-size: 0.86rem;
+}
+
+.playground-safety strong {
+  color: var(--accent-strong);
+}
+
+.playground-modal {
+  position: fixed;
+  z-index: 90;
+  inset: 0;
+  padding: 20px;
+  display: grid;
+  place-items: center;
+  overflow-y: auto;
+  background: rgba(24, 18, 14, 0.62);
+  backdrop-filter: blur(5px);
+}
+
+.playground-modal__card {
+  position: relative;
+  width: min(100%, 570px);
+  padding: 34px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  color: var(--text-primary);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-high);
+}
+
+.playground-modal__card h2 {
+  margin: 8px 0 22px;
+  font-family: Aptos, "Segoe UI", sans-serif;
+  font-size: 1.55rem;
+  font-weight: 850;
+}
+
+.playground-modal__card label,
+.playground-modal__card fieldset {
+  margin: 0 0 16px;
+  display: grid;
+  gap: 7px;
+  color: var(--text-secondary);
+  font-size: 0.84rem;
+  font-weight: 750;
+}
+
+.playground-modal__card input,
+.playground-modal__card select,
+.playground-modal__card textarea {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  background: var(--surface-base);
+  font: inherit;
+}
+
+.playground-modal__card fieldset {
+  padding: 0;
+  border: 0;
+}
+
+.playground-modal__card legend {
+  margin-bottom: 7px;
+}
+
+.playground-modal__close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+}
+
+.playground-modal__actions {
+  margin-top: 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.segmented-control {
+  padding: 4px;
+  border-radius: var(--radius-md);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  background: var(--surface-inset);
+  box-shadow: var(--shadow-inset);
+}
+
+.segmented-control button {
+  padding: 10px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  background: transparent;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.segmented-control button[aria-pressed='true'] {
+  color: var(--accent-strong);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-low);
+}
+
+.form-error {
+  color: var(--danger);
+  font-size: 0.82rem;
+  font-weight: 750;
 }
 
 /* Dialog and toasts */
@@ -2312,6 +2498,7 @@ h3 {
   .public-footer__inner,
   .staff-header__inner,
   .staff-page,
+  .playground-page,
   .login-page,
   .message-page,
   .auth-loading-page {
@@ -2498,6 +2685,22 @@ h3 {
     right: 14px;
     bottom: 14px;
     width: calc(100% - 28px);
+  }
+}
+
+@media (max-width: 760px) {
+  .playground-hero {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .playground-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .playground-actions .button {
+    flex: 1;
   }
 }
 

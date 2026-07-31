@@ -25,37 +25,51 @@ export function QueueItemCard({
   item,
   visualPosition,
   pendingKey,
+  canStart = true,
+  startDisabledReason,
   onAction,
 }: {
   item: QueueItem
   visualPosition: number
   pendingKey: string
+  canStart?: boolean
+  startDisabledReason?: string
   onAction: (mutation: QueueMutation, item: QueueItem) => void
 }) {
   const inService = item.status === 'in_service'
+  const lockedNext = item.status === 'queued' && item.is_next_locked
+  const scheduledNow = item.status === 'queued' && item.priority_group === 3
   const sourceLabel = item.source_type === 'booking' ? 'Scheduled' : 'Waiting List'
-  const detailTime =
-    item.source_type === 'booking'
-      ? formatTime(item.scheduled_start_time)
-      : formatTime(item.arrived_at ?? item.joined_at)
-  const itemPending = pendingKey.endsWith(`${item.source_type}:${item.source_id}`)
+  const detailTime = item.source_type === 'booking'
+    ? [formatTime(item.scheduled_start_time), formatTime(item.scheduled_end_time)].join(' – ')
+    : formatTime(item.arrived_at)
+  const itemPending = pendingKey.endsWith(item.queue_entry_id)
   const customerNote = item.notes?.trim()
+  const statusLabel = inService
+    ? 'In Service'
+    : lockedNext
+      ? 'Next'
+      : scheduledNow
+        ? 'Scheduled Now'
+        : 'Waiting'
 
   return (
-    <article className={`queue-card${inService ? ' queue-card--active' : ''}`}>
+    <article className={`queue-card${inService ? ' queue-card--active' : ''}${lockedNext ? ' queue-card--next' : ''}${scheduledNow ? ' queue-card--scheduled' : ''}`}>
       <div className="queue-card__position">
-        <span>{inService ? 'NOW' : String(visualPosition).padStart(2, '0')}</span>
-        <small>{inService ? 'Serving' : 'Queue'}</small>
+        <span>{inService ? 'NOW' : `#${item.queue_number}`}</span>
+        <small>{inService ? 'Serving' : `Live ${item.live_position || visualPosition}`}</small>
       </div>
       <div className="queue-card__identity">
         <div className="queue-card__badges">
-          <span className={`badge ${inService ? 'badge--active' : ''}`}>
-            {inService ? 'In Service' : 'Ready'}
+          <span className={`badge ${inService ? 'badge--active' : lockedNext ? 'badge--next' : scheduledNow ? 'badge--scheduled' : ''}`}>
+            {statusLabel}
           </span>
           <span className="badge badge--neutral">{sourceLabel}</span>
         </div>
         <h3>{item.customer_name}</h3>
         <p>{item.service_name ?? 'Service details not specified'}</p>
+        {lockedNext ? <p className="queue-card__notice">Customer notified and locked as next.</p> : null}
+        {item.requeued_at ? <p className="queue-card__notice">Returned to the queue; original number retained.</p> : null}
         {customerNote ? (
           <section className="queue-card__note" aria-label="Customer note">
             <small>Customer note</small>
@@ -70,7 +84,7 @@ export function QueueItemCard({
           <Clock3 aria-hidden="true" size={18} />
         )}
         <span>
-          <small>{item.source_type === 'booking' ? 'Scheduled' : 'Arrived'}</small>
+          <small>{item.source_type === 'booking' ? 'Scheduled window' : 'Arrived'}</small>
           <strong>{detailTime}</strong>
         </span>
       </div>
@@ -90,8 +104,9 @@ export function QueueItemCard({
             className="button button--primary button--compact"
             type="button"
             onClick={() => onAction('start', item)}
-            disabled={itemPending}
+            disabled={itemPending || !canStart}
             aria-label={`Start service for ${item.customer_name}`}
+            title={!canStart ? startDisabledReason : undefined}
           >
             <Play aria-hidden="true" size={16} />
             Doing
@@ -100,9 +115,9 @@ export function QueueItemCard({
         <button
           className="button button--quiet button--compact"
           type="button"
-          onClick={() => onAction('cancel', item)}
+          onClick={() => onAction(inService ? 'requeue' : 'cancel', item)}
           disabled={itemPending}
-          aria-label={`Cancel queue entry for ${item.customer_name}`}
+          aria-label={inService ? `Return ${item.customer_name} to the queue` : `Cancel queue entry for ${item.customer_name}`}
         >
           <X aria-hidden="true" size={17} />
           Cancel

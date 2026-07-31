@@ -6,6 +6,7 @@ import { AboutPage } from '../pages/AboutPage'
 import { HomePage } from '../pages/HomePage'
 import { LoginPage } from '../pages/LoginPage'
 import { NotFoundPage } from '../pages/NotFoundPage'
+import { PlaygroundPage } from '../pages/PlaygroundPage'
 import { StaffPage } from '../pages/StaffPage'
 import { UnauthorizedPage } from '../pages/UnauthorizedPage'
 
@@ -18,6 +19,7 @@ export function AppRouter() {
           <Route path="about" element={<AboutPage />} />
           <Route path="login" element={<LoginPage />} />
           <Route path="unauthorized" element={<UnauthorizedPage />} />
+          <Route path="playground" element={<PlaygroundPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
 

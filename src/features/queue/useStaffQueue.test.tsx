@@ -35,33 +35,34 @@ vi.mock('./queueService', () => ({
   getStaffQueueToday,
   startQueueItem: vi.fn(),
   completeQueueItem: vi.fn(),
-  cancelQueueItem: vi.fn(),
+  requeueInServiceItem: vi.fn(),
+  cancelQueuedItem: vi.fn(),
 }))
 
 import { useStaffQueue } from './useStaffQueue'
 
 const queueRows: QueueItem[] = [
   {
+    queue_entry_id: '00000000-0000-4000-a000-000000000002',
+    queue_number: 2,
     source_type: 'waiting_list',
-    source_id: '2',
-    reference_id: 'WL-2',
-    company: 'sample_company',
-    employee_code: 'EMP-001',
+    source_reference: 'WL-2',
     customer_name: 'Waiting Customer',
+    customer_chat_id: '102',
     service_code: 'haircut',
     service_name: 'Haircut',
-    queue_date: '2026-07-29',
-    scheduled_date: null,
     scheduled_start_time: null,
-    joined_at: '2026-07-29T10:05:00+08:00',
+    scheduled_end_time: null,
+    scheduled_priority_eligible: false,
     arrived_at: '2026-07-29T10:05:00+08:00',
+    queue_order_at: '2026-07-29T10:05:00+08:00',
+    requeued_at: null,
     service_started_at: null,
-    status: 'confirmed',
+    status: 'queued',
     notes: 'Please call my name quietly.',
-    arrival_verification_source: 'chatbot_daily_question',
-    queue_position: 1,
-    priority_group: 3,
-    priority_time: '2026-07-29T10:05:00+08:00',
+    is_next_locked: false,
+    priority_group: 4,
+    live_position: 1,
   },
 ]
 
@@ -104,5 +105,14 @@ describe('useStaffQueue Realtime refresh', () => {
 
     unmount()
     expect(removeChannel).toHaveBeenCalledTimes(1)
+  })
+
+  it('refreshes after canonical queue-entry events', async () => {
+    const { unmount } = renderHook(() => useStaffQueue('sample_company'))
+    await advance(0)
+    act(() => callbacks.get('queue_entries')?.())
+    await advance(280)
+    expect(getStaffQueueToday).toHaveBeenCalledTimes(2)
+    unmount()
   })
 })

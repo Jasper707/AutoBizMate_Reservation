@@ -42,6 +42,9 @@ export function PublicHeader() {
           <NavLink to="/about" onClick={() => setMenuOpen(false)}>
             About
           </NavLink>
+          <NavLink to="/playground" onClick={() => setMenuOpen(false)}>
+            Playground
+          </NavLink>
           <NavLink
             className="nav-cta"
             to={status === 'authorized' ? '/staff' : '/login'}

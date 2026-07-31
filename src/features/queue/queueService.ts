@@ -1,5 +1,5 @@
 import { supabase } from '../../lib/supabaseClient'
-import type { QueueItem, QueueSource } from './queueModels'
+import type { QueueItem, QueueMutationResult } from './queueModels'
 
 const QUEUE_ERROR = 'Could not load the queue. Try again.'
 const ACTION_ERROR = 'That queue item could not be updated. Refresh and try again.'
@@ -11,35 +11,41 @@ function assertSupabase() {
 
 export async function getStaffQueueToday() {
   const client = assertSupabase()
-  const { data, error } = await client.rpc('get_staff_queue_today')
+  const { data, error } = await client.rpc('get_ordered_staff_queue')
 
   if (error) throw new Error(QUEUE_ERROR)
   return (data ?? []) as QueueItem[]
 }
 
 async function mutateQueueItem(
-  functionName: 'start_queue_item' | 'complete_queue_item' | 'cancel_queue_item',
-  sourceType: QueueSource,
-  sourceId: string,
+  functionName:
+    | 'start_queue_item'
+    | 'complete_queue_item'
+    | 'requeue_in_service_item'
+    | 'cancel_queued_item',
+  queueEntryId: string,
 ) {
   const client = assertSupabase()
   const { data, error } = await client.rpc(functionName, {
-    p_source_type: sourceType,
-    p_source_id: sourceId,
+    p_queue_entry_id: queueEntryId,
   })
 
   if (error) throw new Error(ACTION_ERROR)
-  return data
+  return data as QueueMutationResult
 }
 
-export function startQueueItem(sourceType: QueueSource, sourceId: string) {
-  return mutateQueueItem('start_queue_item', sourceType, sourceId)
+export function startQueueItem(queueEntryId: string) {
+  return mutateQueueItem('start_queue_item', queueEntryId)
 }
 
-export function completeQueueItem(sourceType: QueueSource, sourceId: string) {
-  return mutateQueueItem('complete_queue_item', sourceType, sourceId)
+export function completeQueueItem(queueEntryId: string) {
+  return mutateQueueItem('complete_queue_item', queueEntryId)
 }
 
-export function cancelQueueItem(sourceType: QueueSource, sourceId: string) {
-  return mutateQueueItem('cancel_queue_item', sourceType, sourceId)
+export function requeueInServiceItem(queueEntryId: string) {
+  return mutateQueueItem('requeue_in_service_item', queueEntryId)
+}
+
+export function cancelQueuedItem(queueEntryId: string) {
+  return mutateQueueItem('cancel_queued_item', queueEntryId)
 }

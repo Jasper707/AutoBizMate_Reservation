@@ -5,26 +5,26 @@ import { QueueItemCard } from './QueueItemCard'
 
 function queueItem(overrides: Partial<QueueItem> = {}): QueueItem {
   return {
+    queue_entry_id: '00000000-0000-4000-a000-000000000042',
+    queue_number: 7,
     source_type: 'waiting_list',
-    source_id: '42',
-    reference_id: 'WL-TEST-42',
-    company: 'codex_v2_test',
-    employee_code: 'EMP-001',
+    source_reference: 'WL-TEST-42',
     customer_name: 'Test Customer',
+    customer_chat_id: null,
     service_code: 'haircut',
     service_name: 'Haircut',
-    queue_date: '2026-07-29',
-    scheduled_date: null,
     scheduled_start_time: null,
-    joined_at: '2026-07-29T09:00:00+08:00',
+    scheduled_end_time: null,
+    scheduled_priority_eligible: false,
     arrived_at: '2026-07-29T09:05:00+08:00',
+    queue_order_at: '2026-07-29T09:05:00+08:00',
+    requeued_at: null,
     service_started_at: null,
-    status: 'confirmed',
+    status: 'queued',
     notes: null,
-    arrival_verification_source: 'chatbot_daily_question',
-    queue_position: 1,
-    priority_group: 3,
-    priority_time: '2026-07-29T09:05:00+08:00',
+    is_next_locked: false,
+    priority_group: 4,
+    live_position: 1,
     ...overrides,
   }
 }
@@ -69,16 +69,33 @@ describe('QueueItemCard customer notes', () => {
   it('supports refreshed booking rows with notes', () => {
     renderCard(queueItem({
       source_type: 'booking',
-      source_id: '84',
-      reference_id: 'BK-TEST-84',
-      scheduled_date: '2026-07-29',
+      source_reference: 'BK-TEST-84',
       scheduled_start_time: '14:30:00',
+      scheduled_end_time: '15:30:00',
+      scheduled_priority_eligible: true,
       notes: 'Customer requested a quiet appointment.',
     }))
 
-    expect(screen.getAllByText('Scheduled')).toHaveLength(2)
+    expect(screen.getByText('Scheduled')).toBeInTheDocument()
+    expect(screen.getByText('Scheduled window')).toBeInTheDocument()
     expect(
       screen.getByText('Customer requested a quiet appointment.'),
     ).toBeInTheDocument()
+  })
+
+  it('shows the locked-next state and disables lower-priority Doing', () => {
+    render(
+      <QueueItemCard
+        item={queueItem({ is_next_locked: true, priority_group: 2 })}
+        visualPosition={1}
+        pendingKey=""
+        canStart={false}
+        startDisabledReason="Another customer is currently locked or ordered ahead."
+        onAction={vi.fn()}
+      />,
+    )
+
+    expect(screen.getByText('Next')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /start service/i })).toBeDisabled()
   })
 })

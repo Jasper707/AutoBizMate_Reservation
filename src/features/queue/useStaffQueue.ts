@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { supabase } from '../../lib/supabaseClient'
 import {
-  cancelQueueItem,
+  cancelQueuedItem,
   completeQueueItem,
   getStaffQueueToday,
+  requeueInServiceItem,
   startQueueItem,
 } from './queueService'
-import type { QueueItem, QueueMutation, QueueSource } from './queueModels'
+import type { QueueItem, QueueMutation, QueueMutationResult } from './queueModels'
 
 export function useStaffQueue(company: string | undefined) {
   const [items, setItems] = useState<QueueItem[]>([])
@@ -56,6 +57,11 @@ export function useStaffQueue(company: string | undefined) {
       .channel(`staff-queue-${company}`)
       .on(
         'postgres_changes',
+        { event: '*', schema: 'public', table: 'queue_entries', filter: `company=eq.${company}` },
+        scheduleRefresh,
+      )
+      .on(
+        'postgres_changes',
         { event: '*', schema: 'public', table: 'booking', filter: `company=eq.${company}` },
         scheduleRefresh,
       )
@@ -78,16 +84,18 @@ export function useStaffQueue(company: string | undefined) {
   const mutate = useCallback(
     async (
       mutation: QueueMutation,
-      sourceType: QueueSource,
-      sourceId: string,
+      queueEntryId: string,
     ) => {
-      const key = `${mutation}:${sourceType}:${sourceId}`
+      const key = `${mutation}:${queueEntryId}`
       setPendingKey(key)
       try {
-        if (mutation === 'start') await startQueueItem(sourceType, sourceId)
-        if (mutation === 'complete') await completeQueueItem(sourceType, sourceId)
-        if (mutation === 'cancel') await cancelQueueItem(sourceType, sourceId)
+        let result: QueueMutationResult | undefined
+        if (mutation === 'start') result = await startQueueItem(queueEntryId)
+        if (mutation === 'complete') result = await completeQueueItem(queueEntryId)
+        if (mutation === 'requeue') result = await requeueInServiceItem(queueEntryId)
+        if (mutation === 'cancel') result = await cancelQueuedItem(queueEntryId)
         await loadQueue(true)
+        return result
       } finally {
         setPendingKey('')
       }
