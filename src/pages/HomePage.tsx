@@ -80,7 +80,7 @@ export function HomePage() {
             <Sparkles aria-hidden="true" size={16} />
             Queue clarity, without rigid schedules
           </span>
-          <h1>A Smarter Queue for Walk-In Businesses</h1>
+          <h1>A Smart 24/7 Receptionist</h1>
           <p className="hero-section__lead">
             Let customers check how busy your staff are, schedule future visits, and
             check in when they arrive—all through Messenger.
